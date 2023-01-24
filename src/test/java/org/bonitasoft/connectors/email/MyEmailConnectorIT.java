@@ -48,6 +48,7 @@ import org.bonitasoft.engine.connector.ConnectorException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 import org.bonitasoft.engine.connector.EngineExecutionContext;
 import org.bonitasoft.engine.exception.BonitaException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +64,7 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class EmailConnectorIT {
+class MyEmailConnectorIT {
 
     @RegisterExtension
     static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP);
@@ -118,6 +119,7 @@ class EmailConnectorIT {
         assertThat(message.getRecipients(RecipientType.TO)[0]).hasToString(ADDRESSJOHN);
         assertThat(message.getSubject()).isEqualTo(SUBJECT);
     }
+
 
     @Test
     void testSendEmailWithAutentication() throws Exception {
@@ -357,9 +359,9 @@ class EmailConnectorIT {
         when(engineExecutionContext.getProcessInstanceId()).thenReturn(1L);
         when(processAPI.getLastDocument(1L, "Document1")).thenReturn(document);
         Map<String, Object> parameters = getBasicSettings();
-        parameters.put(EmailConnector.MESSAGE, "Hello Mr message\n This is an email content");
+        parameters.put(MyEmailConnector.MESSAGE, "Hello Mr message\n This is an email content");
         List<String> attachments = Collections.singletonList("Document1");
-        parameters.put(EmailConnector.ATTACHMENTS, attachments);
+        parameters.put(MyEmailConnector.ATTACHMENTS, attachments);
 
         executeConnector(parameters);
 
@@ -383,9 +385,9 @@ class EmailConnectorIT {
         when(engineExecutionContext.getProcessInstanceId()).thenReturn(1L);
         when(processAPI.getLastDocument(1L, "Document1")).thenReturn(document);
         Map<String, Object> parameters = getBasicSettings();
-        parameters.put(EmailConnector.MESSAGE, "Hello Mr message\n This is an email content");
+        parameters.put(MyEmailConnector.MESSAGE, "Hello Mr message\n This is an email content");
         List<String> attachments = Collections.singletonList("Document1");
-        parameters.put(EmailConnector.ATTACHMENTS, attachments);
+        parameters.put(MyEmailConnector.ATTACHMENTS, attachments);
 
         executeConnector(parameters);
 
@@ -408,7 +410,7 @@ class EmailConnectorIT {
         List<Document> documents2 = Arrays.<Document> asList(document3, document4);
         List<?> lists = Arrays.asList(documents1, documents2);
         Map<String, Object> parameters = getBasicSettings();
-        parameters.put(EmailConnector.ATTACHMENTS, lists);
+        parameters.put(MyEmailConnector.ATTACHMENTS, lists);
 
         executeConnector(parameters);
 
@@ -429,7 +431,7 @@ class EmailConnectorIT {
         DocumentImpl document2 = createDocument(2L, "toto2");
         List<Document> documents = Arrays.<Document> asList(document1, document2);
         Map<String, Object> parameters = getBasicSettings();
-        parameters.put(EmailConnector.ATTACHMENTS, documents);
+        parameters.put(MyEmailConnector.ATTACHMENTS, documents);
 
         executeConnector(parameters);
 
@@ -459,7 +461,7 @@ class EmailConnectorIT {
         when(processAPI.getDocumentContent("storageId")).thenReturn("toto".getBytes());
         Map<String, Object> parameters = getBasicSettings();
         List<String> attachments = Collections.singletonList("Document1");
-        parameters.put(EmailConnector.ATTACHMENTS, attachments);
+        parameters.put(MyEmailConnector.ATTACHMENTS, attachments);
 
         executeConnector(parameters);
 
@@ -487,7 +489,7 @@ class EmailConnectorIT {
         when(processAPI.getDocumentContent("storageId")).thenReturn("toto".getBytes());
         Map<String, Object> parameters = getBasicSettings();
         List<String> attachments = Collections.singletonList("Document1");
-        parameters.put(EmailConnector.ATTACHMENTS, attachments);
+        parameters.put(MyEmailConnector.ATTACHMENTS, attachments);
 
         executeConnector(parameters);
 
@@ -500,7 +502,7 @@ class EmailConnectorIT {
 
     private Map<String, Object> executeConnector(final Map<String, Object> parameters)
             throws ConnectorValidationException, ConnectorException {
-        final EmailConnector email = new EmailConnector();
+        final MyEmailConnector email = new MyEmailConnector();
         email.setExecutionContext(engineExecutionContext);
         email.setAPIAccessor(apiAccessor);
         email.setInputParameters(parameters);

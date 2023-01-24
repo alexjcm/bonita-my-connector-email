@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Authenticator;
@@ -43,7 +42,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
-
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.bpm.document.Document;
 import org.bonitasoft.engine.bpm.document.DocumentNotFoundException;
@@ -53,12 +51,12 @@ import org.bonitasoft.engine.connector.ConnectorValidationException;
 
 /**
  * This connector provides an email sending service.
- * 
+ *
  * @author Matthieu Chaffotte
  * @author Yanyan Liu
  * @author Baptiste Mesta
  */
-public class EmailConnector extends AbstractConnector {
+public class MyEmailConnector extends AbstractConnector {
 
     /**
      * The files to attach to the email.
@@ -109,6 +107,11 @@ public class EmailConnector extends AbstractConnector {
      * The "Reply-to" recipient(s) email address(es).
      */
     public static final String REPLY_TO = "replyTo";
+
+    /**
+     * The sender's name
+     */
+    public static final String SENDER_NAME = "senderName";
 
     /**
      * The sender's email address.
@@ -212,6 +215,7 @@ public class EmailConnector extends AbstractConnector {
         logInputParameter(BCC);
         logInputParameter(CC);
         logInputParameter(TO);
+        logInputParameter(SENDER_NAME);
         logInputParameter(FROM);
         logInputParameter(RETURN_PATH);
         logInputParameter(USER_NAME);
@@ -269,7 +273,7 @@ public class EmailConnector extends AbstractConnector {
      *
      * @return an unshared email session from the SMTP server's properties
      */
-     Session getSession() {
+    Session getSession() {
         final Properties properties = new Properties();
         properties.put("mail.smtp.host", getInputParameter(SMTP_HOST));
         final String smtpPort = String.valueOf(getInputParameter(SMTP_PORT));
@@ -281,7 +285,7 @@ public class EmailConnector extends AbstractConnector {
         if (returnPath != null && !returnPath.isEmpty()) {
             properties.put("mail.smtp.from", returnPath);
         }
-       
+
         Boolean startTlsParameter = (Boolean) getInputParameter(STARTTLS_SUPPORT, false);
         Boolean sslParameter = (Boolean) getInputParameter(SSL_SUPPORT, true);
         // Using STARTTLS
@@ -292,13 +296,13 @@ public class EmailConnector extends AbstractConnector {
         }
         // Using SSL
         boolean useSSL = Boolean.TRUE.equals(sslParameter);
-        if(useSSL && Boolean.FALSE.equals(startTlsParameter)) {
+        if (useSSL && Boolean.FALSE.equals(startTlsParameter)) {
             properties.put("mail.smtp.ssl.enable", "true");
         }
-        if(useSSL || useStarttls) {
-            if((boolean)getInputParameter(TRUST_CERTIFICATE, false)) {
+        if (useSSL || useStarttls) {
+            if ((boolean) getInputParameter(TRUST_CERTIFICATE, false)) {
                 properties.put("mail.smtp.ssl.trust", "*");
-            }else {
+            } else {
                 properties.put("mail.smtp.ssl.checkserveridentity", "true");
             }
         }
@@ -316,8 +320,8 @@ public class EmailConnector extends AbstractConnector {
     }
 
     private Map<String, String> getHeaders() {
-        @SuppressWarnings("unchecked")
-        final List<List<Object>> headersList = (List<List<Object>>) getInputParameter(HEADERS);
+        @SuppressWarnings("unchecked") final List<List<Object>> headersList = (List<List<Object>>) getInputParameter(
+            HEADERS);
         final Map<String, String> headers = new HashMap<>();
         if (headersList != null) {
             for (List<Object> rows : headersList) {
@@ -338,12 +342,11 @@ public class EmailConnector extends AbstractConnector {
     /**
      * Get a MimeMessage from email properties.
      *
-     * @param emailSession
-     *        the email session
-     * @throws AddressException
-     *         if an exception occurs
+     * @param emailSession the email session
+     * @throws AddressException if an exception occurs
      */
-    private MimeMessage getEmail(Session emailSession) throws ConnectorException {
+    private MimeMessage getEmail(Session emailSession)
+        throws ConnectorException, UnsupportedEncodingException {
         MimeMessage mimeMessage = new MimeMessage(emailSession);
         try {
             setMessageAddresses(mimeMessage);
@@ -355,7 +358,8 @@ public class EmailConnector extends AbstractConnector {
         return mimeMessage;
     }
 
-    private void setMessageContent(MimeMessage mimeMessage) throws MessagingException, ConnectorException {
+    private void setMessageContent(MimeMessage mimeMessage)
+        throws MessagingException, ConnectorException {
         String subject = (String) getInputParameter(SUBJECT);
         String charset = (String) getInputParameter(CHARSET, "UTF-8");
         String message = (String) getInputParameter(MESSAGE, "");
@@ -383,15 +387,17 @@ public class EmailConnector extends AbstractConnector {
         }
     }
 
-    private void setMessageAddresses(MimeMessage mimeMessage) throws MessagingException {
+    private void setMessageAddresses(MimeMessage mimeMessage)
+        throws MessagingException, UnsupportedEncodingException {
+        String senderName = (String) getInputParameter(SENDER_NAME);
         String from = (String) getInputParameter(FROM);
         String to = (String) getInputParameter(TO);
         String cc = (String) getInputParameter(CC);
         String bcc = (String) getInputParameter(BCC);
         String replyTo = (String) getInputParameter(REPLY_TO);
 
-        if (from != null && !from.isEmpty()) {
-            mimeMessage.setFrom(new InternetAddress(from));
+        if (from != null && !from.isEmpty() && senderName != null && !senderName.isEmpty()) {
+            mimeMessage.setFrom(new InternetAddress(from, senderName));
         } else {
             mimeMessage.setFrom();
         }
@@ -411,8 +417,8 @@ public class EmailConnector extends AbstractConnector {
      * Get the <code>Multipart</code> of the email.
      */
     private Multipart getMultipart(final boolean html, final String message, final String charset,
-            List<Object> attachments)
-            throws ConnectorException {
+        List<Object> attachments)
+        throws ConnectorException {
         try {
             StringBuilder messageBody = new StringBuilder(message);
             ProcessAPI processAPI = getAPIAccessor().getProcessAPI();
@@ -445,8 +451,8 @@ public class EmailConnector extends AbstractConnector {
 
     @SuppressWarnings("rawtypes")
     private void handleAttachment(boolean html, StringBuilder messageBody, ProcessAPI processAPI,
-            List<MimeBodyPart> bodyParts, Object attachment)
-            throws ConnectorException, DocumentNotFoundException, MessagingException, UnsupportedEncodingException {
+        List<MimeBodyPart> bodyParts, Object attachment)
+        throws ConnectorException, DocumentNotFoundException, MessagingException, UnsupportedEncodingException {
         if (attachment instanceof List) {
             for (Object subAttachment : ((List) attachment)) {
                 handleAttachment(html, messageBody, processAPI, bodyParts, subAttachment);
@@ -469,7 +475,7 @@ public class EmailConnector extends AbstractConnector {
     }
 
     private void addBodyPart(ProcessAPI processAPI, List<MimeBodyPart> bodyParts, Document document)
-            throws DocumentNotFoundException, MessagingException, UnsupportedEncodingException {
+        throws DocumentNotFoundException, MessagingException, UnsupportedEncodingException {
         MimeBodyPart bodyPart;
         String fileName = document.getContentFileName();
         byte[] docContent = processAPI.getDocumentContent(document.getContentStorageId());
@@ -485,7 +491,7 @@ public class EmailConnector extends AbstractConnector {
     }
 
     private Document getDocument(Object attachment, ProcessAPI processAPI)
-            throws ConnectorException, DocumentNotFoundException {
+        throws ConnectorException, DocumentNotFoundException {
         if (attachment instanceof String && !((String) attachment).trim().isEmpty()) {
             String docName = (String) attachment;
             long processInstanceId = getExecutionContext().getProcessInstanceId();
@@ -494,7 +500,7 @@ public class EmailConnector extends AbstractConnector {
             return (Document) attachment;
         } else {
             throw new ConnectorException(
-                    "Attachments must be document names or org.bonitasoft.engine.bpm.document.Document");
+                "Attachments must be document names or org.bonitasoft.engine.bpm.document.Document");
         }
     }
 

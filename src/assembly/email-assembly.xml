@@ -12,7 +12,7 @@
             <outputDirectory/>
             <directory>target/classes</directory>
             <includes>
-                <include>email.impl</include>
+                <include>my-email.impl</include>
                 <include>classpath</include>
             </includes>
         </fileSet>

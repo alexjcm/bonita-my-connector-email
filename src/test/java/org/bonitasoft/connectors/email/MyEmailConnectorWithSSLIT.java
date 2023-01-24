@@ -42,7 +42,7 @@ import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.DummySSLSocketFactory;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
-class EmailConnectorWithSSLIT {
+class MyEmailConnectorWithSSLIT {
     
     static {
         Security.setProperty("ssl.SocketFactory.provider", DummySSLSocketFactory.class.getName());
@@ -73,7 +73,7 @@ class EmailConnectorWithSSLIT {
     @Test
     void should_ssl_not_check_server_identity_when_autotrust_is_true() throws Exception {
         Map<String, Object> basicSSLSettings = getBasicSSLSettings();
-        basicSSLSettings.put(EmailConnector.TRUST_CERTIFICATE, true);
+        basicSSLSettings.put(MyEmailConnector.TRUST_CERTIFICATE, true);
         executeConnector(basicSSLSettings);
         
         final MimeMessage[] messages = greenMail.getReceivedMessages();
@@ -86,18 +86,18 @@ class EmailConnectorWithSSLIT {
     
     private Map<String, Object> getBasicSSLSettings() {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put(EmailConnector.SMTP_HOST, greenMail.getSmtps().getBindTo());
-        parameters.put(EmailConnector.SMTP_PORT, greenMail.getSmtps().getPort());
-        parameters.put(EmailConnector.TO, ADDRESSJOHN);
-        parameters.put(EmailConnector.SUBJECT, SUBJECT);
-        parameters.put(EmailConnector.SSL_SUPPORT, true);
-        parameters.put(EmailConnector.HTML, false);
+        parameters.put(MyEmailConnector.SMTP_HOST, greenMail.getSmtps().getBindTo());
+        parameters.put(MyEmailConnector.SMTP_PORT, greenMail.getSmtps().getPort());
+        parameters.put(MyEmailConnector.TO, ADDRESSJOHN);
+        parameters.put(MyEmailConnector.SUBJECT, SUBJECT);
+        parameters.put(MyEmailConnector.SSL_SUPPORT, true);
+        parameters.put(MyEmailConnector.HTML, false);
         return parameters;
     }
 
     private Map<String, Object> executeConnector(final Map<String, Object> parameters)
             throws ConnectorValidationException, ConnectorException {
-        final EmailConnector email = new EmailConnector();
+        final MyEmailConnector email = new MyEmailConnector();
         email.setExecutionContext(engineExecutionContext);
         email.setAPIAccessor(apiAccessor);
         email.setInputParameters(parameters);

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition:ConnectorDefinition xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<id>${email.def.id}</id>
-	<version>${email.def.version}</version>
-	<icon>email.png</icon>
+	<id>${my-email.def.id}</id>
+	<version>${my-email.def.version}</version>
+	<icon>my-email.png</icon>
 
-	<category id="messaging" icon="messaging.png" />
+	<category id="MessagingV2" icon="messagingv2.png" />
 
 	<input name="smtpHost" type="java.lang.String" mandatory="true" defaultValue="smtp.gmail.com" />
 	<input name="smtpPort" type="java.lang.Integer" mandatory="true" defaultValue="465" />
@@ -14,6 +14,7 @@
 	<input name="userName" type="java.lang.String" />
 	<input name="password" type="java.lang.String" />
 	<input name="from" type="java.lang.String" mandatory="true" />
+	<input name="senderName" type="java.lang.String" mandatory="true" />
 	<input name="returnPath" type="java.lang.String" />
 	<input name="to" type="java.lang.String" mandatory="true" />
 	<input name="bcc" type="java.lang.String" />
@@ -40,6 +41,7 @@
 		</widget>
 	</page>
 	<page id="addressee">
+	  <widget id="senderName" inputName="senderName" xsi:type="definition:Text" />
 		<widget id="from" inputName="from" xsi:type="definition:Text" />
 		<widget id="to" inputName="to" xsi:type="definition:Text" />
 		<widget id="other" xsi:type="definition:Group">

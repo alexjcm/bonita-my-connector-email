@@ -45,7 +45,7 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class EmailConnectorTest {
+class MyEmailConnectorTest {
     
     private static final String SMTP_HOST = "localhost";
     private static final String ADDRESSJOHN = "john.doe@bonita.org";
@@ -66,18 +66,18 @@ class EmailConnectorTest {
 
     private Map<String, Object> getBasicSettings() {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put(EmailConnector.SMTP_HOST, SMTP_HOST);
-        parameters.put(EmailConnector.SMTP_PORT, 25);
-        parameters.put(EmailConnector.TO, ADDRESSJOHN);
-        parameters.put(EmailConnector.SUBJECT, SUBJECT);
-        parameters.put(EmailConnector.SSL_SUPPORT, false);
-        parameters.put(EmailConnector.HTML, false);
+        parameters.put(MyEmailConnector.SMTP_HOST, SMTP_HOST);
+        parameters.put(MyEmailConnector.SMTP_PORT, 25);
+        parameters.put(MyEmailConnector.TO, ADDRESSJOHN);
+        parameters.put(MyEmailConnector.SUBJECT, SUBJECT);
+        parameters.put(MyEmailConnector.SSL_SUPPORT, false);
+        parameters.put(MyEmailConnector.HTML, false);
         return parameters;
     }
 
 
     private void validateConnector(final Map<String, Object> parameters) throws ConnectorValidationException {
-        final EmailConnector email = new EmailConnector();
+        final MyEmailConnector email = new MyEmailConnector();
         email.setInputParameters(parameters);
         email.validateInputParameters();
     }
@@ -150,7 +150,7 @@ class EmailConnectorTest {
         validateConnector(parameters);
     }
 
-    
+
     @ParameterizedTest
     @MethodSource("provideInvalidInputs")
     void thowsExceptionDueToInvalidInputs(String input, Object value) throws ConnectorValidationException {
